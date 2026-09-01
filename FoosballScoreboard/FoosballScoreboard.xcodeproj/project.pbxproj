@@ -6,6 +6,16 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXContainerItemProxy section */
+		A11F00BA11F00BA11F000029 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A11F00BA11F00BA11F000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A11F00BA11F00BA11F000002;
+			remoteInfo = FoosballScoreboard;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
 		A11F00BA11F00BA11F00000F /* Exceptions for "FoosballScoreboard" folder in "FoosballScoreboard" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
@@ -25,14 +35,27 @@
 			path = FoosballScoreboard;
 			sourceTree = "<group>";
 		};
+		A11F00BA11F00BA11F000021 /* FoosballScoreboardTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = FoosballScoreboardTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFileReference section */
 		A11F00BA11F00BA11F000003 /* FoosballScoreboard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FoosballScoreboard.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A11F00BA11F00BA11F000020 /* FoosballScoreboardTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FoosballScoreboardTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		A11F00BA11F00BA11F000007 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A11F00BA11F00BA11F000024 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -46,7 +69,9 @@
 			isa = PBXGroup;
 			children = (
 				A11F00BA11F00BA11F000004 /* FoosballScoreboard */,
+				A11F00BA11F00BA11F000021 /* FoosballScoreboardTests */,
 				A11F00BA11F00BA11F000003 /* FoosballScoreboard.app */,
+				A11F00BA11F00BA11F000020 /* FoosballScoreboardTests.xctest */,
 			);
 			sourceTree = "<group>";
 		};
@@ -73,6 +98,27 @@
 			productReference = A11F00BA11F00BA11F000003 /* FoosballScoreboard.app */;
 			productType = "com.apple.product-type.application";
 		};
+		A11F00BA11F00BA11F000022 /* FoosballScoreboardTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A11F00BA11F00BA11F000028 /* Build configuration list for PBXNativeTarget "FoosballScoreboardTests" */;
+			buildPhases = (
+				A11F00BA11F00BA11F000023 /* Sources */,
+				A11F00BA11F00BA11F000024 /* Frameworks */,
+				A11F00BA11F00BA11F000025 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A11F00BA11F00BA11F00002A /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				A11F00BA11F00BA11F000021 /* FoosballScoreboardTests */,
+			);
+			name = FoosballScoreboardTests;
+			productName = FoosballScoreboardTests;
+			productReference = A11F00BA11F00BA11F000020 /* FoosballScoreboardTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -85,6 +131,10 @@
 				TargetAttributes = {
 					A11F00BA11F00BA11F000002 = {
 						CreatedOnToolsVersion = 16.0;
+					};
+					A11F00BA11F00BA11F000022 = {
+						CreatedOnToolsVersion = 16.0;
+						TestTargetID = A11F00BA11F00BA11F000002;
 					};
 				};
 			};
@@ -109,12 +159,20 @@
 			projectRoot = "";
 			targets = (
 				A11F00BA11F00BA11F000002 /* FoosballScoreboard */,
+				A11F00BA11F00BA11F000022 /* FoosballScoreboardTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		A11F00BA11F00BA11F000008 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A11F00BA11F00BA11F000025 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -131,7 +189,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A11F00BA11F00BA11F000023 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A11F00BA11F00BA11F00002A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A11F00BA11F00BA11F000002 /* FoosballScoreboard */;
+			targetProxy = A11F00BA11F00BA11F000029 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		A11F00BA11F00BA11F00000B /* Debug */ = {
@@ -325,6 +398,64 @@
 			};
 			name = Release;
 		};
+		A11F00BA11F00BA11F000026 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.eliranrp.foosballscoreboard.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FoosballScoreboard.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FoosballScoreboard";
+			};
+			name = Debug;
+		};
+		A11F00BA11F00BA11F000027 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.eliranrp.foosballscoreboard.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FoosballScoreboard.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FoosballScoreboard";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -342,6 +473,15 @@
 			buildConfigurations = (
 				A11F00BA11F00BA11F00000D /* Debug */,
 				A11F00BA11F00BA11F00000E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A11F00BA11F00BA11F000028 /* Build configuration list for PBXNativeTarget "FoosballScoreboardTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A11F00BA11F00BA11F000026 /* Debug */,
+				A11F00BA11F00BA11F000027 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
