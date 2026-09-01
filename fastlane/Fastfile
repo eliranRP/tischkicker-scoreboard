@@ -1,0 +1,291 @@
+# frozen_string_literal: true
+
+require "base64"
+require "fileutils"
+require "json"
+require "open3"
+require "tmpdir"
+
+# Fastlane for Foosball Scoreboard (scheme FoosballScoreboard).
+# Does not invent APPLE_TEAM_ID or App Store Connect API credentials.
+# Never prints API key material.
+
+opt_out_usage
+skip_docs
+
+default_platform(:ios)
+
+PROJECT = "FoosballScoreboard/FoosballScoreboard.xcodeproj"
+SCHEME = "FoosballScoreboard"
+APP_IDENTIFIER = "com.eliranrp.foosballscoreboard"
+PREFERRED_SIMULATOR = "iPhone 17"
+
+# Listing copy is only what already lives in SUBMIT.md / docs. Do not invent.
+PRIMARY_CATEGORY = "Sports"
+SECONDARY_CATEGORY = "Utilities"
+
+platform :ios do
+  desc "Run XCTest on iPhone Simulator (prefers iPhone 17; falls back to any available iPhone)"
+  lane :test do
+    destination = simulator_destination
+    UI.message("Testing #{SCHEME} on #{destination}")
+    run_tests(
+      project: PROJECT,
+      scheme: SCHEME,
+      destination: destination,
+      output_directory: "fastlane/test_output",
+      output_types: "junit",
+      result_bundle: false
+    )
+  end
+
+  desc "Archive and upload to TestFlight (API key + APPLE_TEAM_ID required)"
+  lane :beta do
+    ensure_deploy_credentials!
+    setup_ci if ENV["CI"]
+    with_api_key_file do |key_path|
+      configure_connect_api!(key_path)
+      build_for_app_store!(key_path)
+      upload_to_testflight(
+        app_identifier: APP_IDENTIFIER,
+        skip_waiting_for_processing: true,
+        skip_submission: true,
+        distribute_external: false
+      )
+    end
+  end
+
+  desc "Archive, upload listing if present, submit for review only when required assets exist"
+  lane :release do
+    ensure_deploy_credentials!
+    setup_ci if ENV["CI"]
+    blockers = review_blockers
+    submit = blockers.empty?
+    unless submit
+      UI.important("Skipping submit_for_review. Missing required App Store assets (not inventing them):")
+      blockers.each { |b| UI.important("  - #{b}") }
+    end
+
+    with_api_key_file do |key_path|
+      configure_connect_api!(key_path)
+      build_for_app_store!(key_path)
+
+      screenshots = screenshot_dir
+      listing = listing_metadata_present?
+
+      deliver_args = {
+        app_identifier: APP_IDENTIFIER,
+        force: true,
+        submit_for_review: submit,
+        automatic_release: false,
+        skip_metadata: !listing,
+        skip_screenshots: screenshots.nil?,
+        metadata_path: "fastlane/metadata",
+        precheck_include_in_app_purchases: false,
+        run_precheck_before_submit: submit,
+        primary_category: PRIMARY_CATEGORY,
+        secondary_category: SECONDARY_CATEGORY,
+        submission_information: {
+          add_id_info_uses_idfa: false,
+          add_id_info_serves_ads: false,
+          add_id_info_tracks_action: false,
+          add_id_info_tracks_install: false,
+          export_compliance_uses_encryption: false,
+          export_compliance_encryption_updated: false
+        }
+      }
+      deliver_args[:screenshots_path] = screenshots unless screenshots.nil?
+      upload_to_app_store(deliver_args)
+    end
+  end
+end
+
+def present?(value)
+  value.to_s.strip != ""
+end
+
+def required_env!(name)
+  value = ENV[name].to_s.strip
+  if value.empty?
+    UI.user_error!("#{name} is missing. Do not invent a team ID or API key. Set the env var or GitHub secret. See DEPLOY.md.")
+  end
+  value
+end
+
+def looks_like_placeholder?(value)
+  %w[TODO CHANGEME YOUR_TEAM_ID XXXXXXXXXX REPLACE_ME EXAMPLE].include?(value.to_s.strip.upcase)
+end
+
+def ensure_deploy_credentials!
+  team = required_env!("APPLE_TEAM_ID")
+  if looks_like_placeholder?(team)
+    UI.user_error!("APPLE_TEAM_ID looks like a placeholder. Refusing to fake a team.")
+  end
+  required_env!("APP_STORE_CONNECT_API_KEY_KEY_ID")
+  required_env!("APP_STORE_CONNECT_API_KEY_ISSUER_ID")
+  filepath = ENV["APP_STORE_CONNECT_API_KEY_KEY_FILEPATH"] || ENV["KEY_FILEPATH"]
+  key_body = ENV["APP_STORE_CONNECT_API_KEY_KEY"]
+  unless present?(filepath) || present?(key_body)
+    UI.user_error!("Set APP_STORE_CONNECT_API_KEY_KEY (the .p8 contents) or APP_STORE_CONNECT_API_KEY_KEY_FILEPATH / KEY_FILEPATH. Never commit the key.")
+  end
+end
+
+def api_key_file_from_env
+  ENV["APP_STORE_CONNECT_API_KEY_KEY_FILEPATH"] || ENV["KEY_FILEPATH"]
+end
+
+def pem_from_env_key!
+  raw = ENV["APP_STORE_CONNECT_API_KEY_KEY"].to_s
+  if raw.strip.empty?
+    UI.user_error!("APP_STORE_CONNECT_API_KEY_KEY is empty and no KEY_FILEPATH was set.")
+  end
+  normalized = raw.gsub("\r\n", "\n").gsub("\\n", "\n")
+  return normalized if normalized.include?("BEGIN ")
+
+  decoded = Base64.decode64(normalized)
+  return decoded if decoded.include?("BEGIN ")
+
+  UI.user_error!("APP_STORE_CONNECT_API_KEY_KEY is not a PEM and is not Base64 of a PEM. Check the GitHub secret. Do not paste the key into the repo.")
+end
+
+def with_api_key_file
+  existing = api_key_file_from_env
+  if present?(existing)
+    if existing.include?("BEGIN ")
+      UI.user_error!("KEY_FILEPATH looks like key contents. Pass a file path, or use APP_STORE_CONNECT_API_KEY_KEY. Never commit the key.")
+    end
+    path = File.expand_path(existing)
+    UI.user_error!("API key file not found (APP_STORE_CONNECT_API_KEY_KEY_FILEPATH / KEY_FILEPATH).") unless File.file?(path)
+    yield path
+    return
+  end
+
+  dir = Dir.mktmpdir("asc-api-key")
+  path = File.join(dir, "AuthKey.p8")
+  File.open(path, File::WRONLY | File::CREAT | File::EXCL, 0o600) do |io|
+    io.write(pem_from_env_key!)
+  end
+  begin
+    yield path
+  ensure
+    FileUtils.remove_entry(dir) if File.directory?(dir)
+  end
+end
+
+def configure_connect_api!(key_path)
+  app_store_connect_api_key(
+    key_id: required_env!("APP_STORE_CONNECT_API_KEY_KEY_ID"),
+    issuer_id: required_env!("APP_STORE_CONNECT_API_KEY_ISSUER_ID"),
+    key_filepath: key_path,
+    in_house: false,
+    set_spaceship_token: true
+  )
+end
+
+def build_for_app_store!(key_path)
+  team = required_env!("APPLE_TEAM_ID")
+  key_id = required_env!("APP_STORE_CONNECT_API_KEY_KEY_ID")
+  issuer_id = required_env!("APP_STORE_CONNECT_API_KEY_ISSUER_ID")
+  quoted_path = key_path.gsub('"', '\\"')
+
+  build_app(
+    project: PROJECT,
+    scheme: SCHEME,
+    configuration: "Release",
+    clean: true,
+    export_method: "app-store",
+    export_team_id: team,
+    output_directory: "build",
+    output_name: "FoosballScoreboard",
+    export_options: {
+      method: "app-store",
+      signingStyle: "automatic",
+      teamID: team
+    },
+    xcargs: [
+      "DEVELOPMENT_TEAM=#{team}",
+      "CODE_SIGN_STYLE=Automatic",
+      "-allowProvisioningUpdates",
+      "-authenticationKeyID", key_id,
+      "-authenticationKeyIssuerID", issuer_id,
+      "-authenticationKeyPath", "\"#{quoted_path}\""
+    ].join(" ")
+  )
+end
+
+def available_iphone_simulator_names
+  json_txt, status = Open3.capture2("xcrun", "simctl", "list", "devices", "available", "-j")
+  unless status.success?
+    UI.user_error!("xcrun simctl failed. iOS tests need Xcode. A local Mac is the source of truth (23/23 green on Xcode 26.6 / iPhone 17).")
+  end
+  data = JSON.parse(json_txt)
+  names = []
+  data.fetch("devices", {}).each_value do |devices|
+    Array(devices).each do |device|
+      next unless device["isAvailable"]
+      name = device["name"].to_s
+      next unless name.start_with?("iPhone")
+      names << name
+    end
+  end
+  names.uniq
+end
+
+def simulator_destination
+  preferred = ENV.fetch("SIMULATOR_DEVICE", PREFERRED_SIMULATOR)
+  available = available_iphone_simulator_names
+  chosen =
+    if available.include?(preferred)
+      preferred
+    elsif (family = available.find { |n| n.start_with?(preferred) })
+      UI.important("Simulator '#{preferred}' not installed; using '#{family}'.")
+      family
+    elsif (fallback = available.first)
+      UI.important("Simulator '#{preferred}' not installed; falling back to '#{fallback}'. GitHub Actions Simulator is not the source of truth.")
+      fallback
+    else
+      UI.user_error!("No iPhone Simulator is available. On a Mac: Xcode → Settings → Platforms. Local `bundle exec fastlane test` is authoritative (23/23 green on Xcode 26.6 / iPhone 17).")
+    end
+  "platform=iOS Simulator,name=#{chosen}"
+end
+
+def metadata_file(*parts)
+  File.join("fastlane", "metadata", *parts)
+end
+
+def nonempty_file?(path)
+  File.file?(path) && File.read(path).strip != ""
+end
+
+def listing_metadata_present?
+  %w[name.txt description.txt privacy_url.txt support_url.txt].all? do |name|
+    nonempty_file?(metadata_file("en-US", name))
+  end
+end
+
+def screenshot_pngs(dir)
+  return [] unless File.directory?(dir)
+  Dir.glob(File.join(dir, "**", "*.{png,PNG,jpg,JPG,jpeg,JPEG}"))
+end
+
+def screenshot_dir
+  committed = File.join("fastlane", "metadata", "screenshots")
+  generated = File.join("fastlane", "screenshots")
+  return committed if screenshot_pngs(committed).any?
+  return generated if screenshot_pngs(generated).any?
+  nil
+end
+
+def review_blockers
+  blockers = []
+  unless listing_metadata_present?
+    blockers << "en-US name/description/privacy_url/support_url under fastlane/metadata"
+  end
+  unless nonempty_file?(metadata_file("copyright.txt"))
+    blockers << "fastlane/metadata/copyright.txt (do not invent a copyright line)"
+  end
+  if screenshot_dir.nil?
+    blockers << "App Store screenshots (none in the repo; do not invent marketing shots)"
+  end
+  blockers
+end

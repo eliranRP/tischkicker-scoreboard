@@ -1,0 +1,10 @@
+# frozen_string_literal: true
+
+# Current Xcode PRODUCT_BUNDLE_IDENTIFIER. SUBMIT.md also suggests
+# com.eliranrp.tischkickerscoreboard — that is not the Xcode value.
+# Do not rename here without a committed reason. See DEPLOY.md.
+app_identifier("com.eliranrp.foosballscoreboard")
+
+# No Apple ID password and no invented team. Archive lanes read
+# APPLE_TEAM_ID from the environment (GitHub secret or local shell).
+team_id(ENV["APPLE_TEAM_ID"]) if ENV["APPLE_TEAM_ID"].to_s.strip != ""

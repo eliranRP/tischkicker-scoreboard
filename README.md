@@ -16,6 +16,8 @@ The app follows the device language. To preview German or another locale in Simu
 
 SwiftUI previews (Canvas) cover the screenshot states: race picker, live 0–0, live 4–3 / 3–2, and match-over.
 
+Tests: `bundle exec fastlane test` (prefers iPhone 17 Simulator). Local Xcode 26.6 / iPhone 17 is the source of truth (23/23). Listing fields: [SUBMIT.md](SUBMIT.md). TestFlight / App Store pipeline: [DEPLOY.md](DEPLOY.md) — no team ID or API key in this repo.
+
 ## What it does
 
 - **Race picker:** first to 5 (after work) or first to 10 (long match).

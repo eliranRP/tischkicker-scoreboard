@@ -1,0 +1,11 @@
+Lokaal tafelvoetbal-scorebord. Twee teams. Eerste tot 5 of 10. Telefoon op de sponning. Geen livevoetbal, geen game.
+
+Stand bijhouden
+• Kies eerste tot 5 of eerste tot 10.
+• Tik een doelpunt.
+• Laatste punt terug als de tik mis was.
+• Nieuwe wedstrijd in één tik.
+
+v1 blijft op de iPhone. Geen account, geen tracking, geen foto’s, geen netwerk.
+
+Verwijder de app om de wedstrijd te wissen. Er is geen kopie in de cloud.

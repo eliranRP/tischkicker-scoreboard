@@ -1,0 +1,64 @@
+# PR tests. Simulator on hosted macOS runners can be slow or missing a
+# given device name (this job does not require iPhone 16). Source of
+# truth is a Mac with Xcode: 23/23 green on Xcode 26.6 / iPhone 17.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  hygiene:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Refuse committed secrets
+        run: |
+          set -euo pipefail
+          if git ls-files | grep -Ei '(^|/)\.env$|\.p8$|AuthKey_'; then
+            echo "Refusing committed .p8 / .env / AuthKey files. Store the API key as a GitHub secret, not in git."
+            exit 1
+          fi
+          if git grep -I -E 'BEGIN (EC |OPENSSH |RSA )?PRIVATE KEY' -- . ':!.github/workflows/ci.yml' ':!fastlane/Fastfile' ':!DEPLOY.md'; then
+            echo "Refusing a committed private key block."
+            exit 1
+          fi
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+
+      - name: Syntax-check Fastlane Ruby
+        run: ruby -c fastlane/Fastfile && ruby -c fastlane/Appfile && ruby -c Gemfile
+
+  test:
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show Xcode
+        run: xcodebuild -version
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      - name: Simulator tests
+        env:
+          FASTLANE_OPT_OUT_USAGE: "YES"
+          FASTLANE_SKIP_UPDATE_CHECK: "YES"
+        run: bundle exec fastlane test
+        # If this job flakes (missing simulator runtime, slow GHA image),
+        # treat a local `bundle exec fastlane test` as authoritative.

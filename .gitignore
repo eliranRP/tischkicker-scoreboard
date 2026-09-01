@@ -9,3 +9,18 @@ build/
 *.ipa
 *.dSYM.zip
 *.dSYM
+
+# Secrets — never commit App Store Connect keys
+*.p8
+AuthKey_*.p8
+.env
+.env.*
+
+# Fastlane / Bundler output
+.bundle/
+vendor/bundle
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+fastlane/README.md.backup
