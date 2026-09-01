@@ -1,0 +1,11 @@
+Local table-football scoresheet. Two teams. First to 5 or 10. Phone on the rail. Not a soccer live-score, not a video game.
+
+How to keep score
+• Choose first to 5 or first to 10.
+• Tap a goal.
+• Undo the last goal if the tap was wrong.
+• Start a new match in one tap.
+
+v1 stays on the iPhone. No account, no tracking, no photos, no network.
+
+Delete the app to wipe the match. There is no cloud copy.

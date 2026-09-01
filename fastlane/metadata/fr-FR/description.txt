@@ -1,0 +1,11 @@
+Marqueur de baby-foot local. Deux équipes. Premier à 5 ou à 10. Téléphone sur la rambarde. Pas un live football, pas un jeu vidéo.
+
+Comment marquer
+• Choisir premier à 5 ou premier à 10.
+• Taper un but.
+• Annuler le dernier but si le tap était faux.
+• Nouvelle partie en un tap.
+
+v1 reste sur l’iPhone. Pas de compte, pas de suivi, pas de photos, pas de réseau.
+
+Supprimez l’app pour effacer la partie. Il n’y a pas de copie dans le cloud.

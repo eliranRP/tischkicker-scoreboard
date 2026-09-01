@@ -1,0 +1,82 @@
+# First ship is explicit. Do not add push-to-main auto-submit.
+# Will fail until Apple Developer membership exists and the GitHub
+# secrets below are set. Do not invent a team ID or API key.
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      track:
+        description: "testflight (archive + TestFlight) or appstore (deliver + submit if metadata is complete)"
+        required: true
+        type: choice
+        options:
+          - testflight
+          - appstore
+
+concurrency:
+  group: ios-release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: macos-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show Xcode
+        run: xcodebuild -version
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      - name: Require Apple secrets
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
+          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
+        run: |
+          missing=0
+          for v in APPLE_TEAM_ID APP_STORE_CONNECT_API_KEY_KEY_ID APP_STORE_CONNECT_API_KEY_ISSUER_ID APP_STORE_CONNECT_API_KEY_KEY; do
+            if [ -z "${!v}" ]; then
+              echo "Missing GitHub secret: ${v}"
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            echo "Refusing to fake Apple credentials. After Developer enrollment, add the secrets listed in DEPLOY.md."
+            exit 1
+          fi
+
+      - name: Fastlane
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
+          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
+          FASTLANE_OPT_OUT_USAGE: "YES"
+          FASTLANE_SKIP_UPDATE_CHECK: "YES"
+        run: |
+          set -euo pipefail
+          track="${{ github.event.inputs.track }}"
+          case "$track" in
+            testflight)
+              bundle exec fastlane beta
+              ;;
+            appstore)
+              bundle exec fastlane release
+              ;;
+            *)
+              echo "Unknown track: ${track}"
+              exit 1
+              ;;
+          esac

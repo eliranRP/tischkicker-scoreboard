@@ -1,0 +1,11 @@
+Lokaler Tischkicker-Spielstand. Zwei Teams. Erste auf 5 oder 10. Handy auf die Reling. Kein Live-Fußball, kein Videospiel.
+
+So hältst du den Spielstand
+• Erste auf 5 oder auf 10 wählen.
+• Tor tippen.
+• Letztes Tor zurück, wenn der Tipp daneben ging.
+• Neue Partie mit einem Tipp.
+
+v1 bleibt auf dem iPhone. Kein Konto, keine Tracker, keine Fotos, kein Netz.
+
+App löschen, um die Partie zu löschen. Es gibt keine Kopie in der Cloud.
