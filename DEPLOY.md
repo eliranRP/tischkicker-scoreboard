@@ -69,7 +69,7 @@ Bump `CURRENT_PROJECT_VERSION` / `MARKETING_VERSION` in the Xcode project before
 
 XCTest is **23/23 green** on a local Mac (Xcode 26.6, iPhone 17). That machine is the source of truth.
 
-`.github/workflows/ci.yml` runs `bundle exec fastlane test` on `macos-latest` for pull requests. Hosted Simulator images can be slow, missing a device name, or on a different Xcode. If that job flakes, re-run locally; do not treat GHA Simulator as authoritative.
+`.github/workflows/ci.yml` runs `bundle exec fastlane test` on `macos-latest` for pull requests as a **best-effort** job (`continue-on-error`). Hosted Simulator images can be slow, missing a device name, or on a different Xcode. If that job flakes, re-run locally; do not treat GHA Simulator as authoritative.
 
 ## Honest limit
 
